@@ -2,9 +2,10 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <title>Global Market</title>
+  <title>글로벌 한인장터</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     .loader { border: 4px solid #f3f3f3; border-top: 4px solid #3b82f6; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
@@ -17,8 +18,8 @@
 <body class="text-gray-800">
 
   <script>
-    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbxvQk7VuDpooLs7mIokqy8FJq1aAy76kWa53q8yVsSBCKCzOqKH3bhMG9_ty95k8n5ADw/exec"; 
-    // 예: "https://script.google.com/macros/s/AKfycbx.../exec"
+    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbwy1uUhHzf8POaho6P5thoCeiFQvsMVS7vEtmgy-sY3e2nWMkb9JzN26OW5TObDEDWZTA/exec"; 
+    // 예: "https://script.google.com/macros/s/.../exec"
   </script>
 
   <nav class="bg-white shadow-md sticky top-0 z-50">
@@ -192,11 +193,13 @@
             <p><i class="fa-regular fa-clock w-5 text-gray-400"></i> <span id="modal-end-date"></span></p>
         </div>
         <div class="bg-white border rounded p-3 mb-6 min-h-[100px]"><p id="modal-desc" class="text-gray-600 whitespace-pre-wrap text-sm"></p></div>
+        
         <div class="flex flex-col gap-2 mb-4">
-            <button id="btn-phone" class="hidden w-full bg-green-500 text-white py-3 rounded-lg font-bold flex items-center justify-center gap-2"><i class="fa-solid fa-phone"></i> 전화번호 보기</button>
-            <button id="btn-kakao-copy" class="hidden w-full bg-yellow-400 text-black py-3 rounded-lg font-bold flex items-center justify-center gap-2"><i class="fa-solid fa-comment"></i> 카톡 ID 복사</button>
-            <button id="btn-open-chat" class="hidden w-full bg-gray-100 text-gray-800 py-3 rounded-lg font-bold flex items-center justify-center gap-2"><i class="fa-solid fa-arrow-up-right-from-square"></i> 오픈채팅</button>
+            <button id="btn-phone" class="hidden w-full bg-green-500 hover:bg-green-600 text-white py-3 rounded-lg font-bold flex items-center justify-center gap-2"></button>
+            <button id="btn-kakao-copy" class="hidden w-full bg-yellow-400 hover:bg-yellow-500 text-black py-3 rounded-lg font-bold flex items-center justify-center gap-2"><i class="fa-solid fa-comment"></i> 카톡 ID 복사</button>
+            <button id="btn-open-chat" class="hidden w-full bg-gray-100 hover:bg-gray-200 text-gray-800 py-3 rounded-lg font-bold flex items-center justify-center gap-2"><i class="fa-solid fa-arrow-up-right-from-square"></i> 오픈채팅</button>
         </div>
+        
         <div class="border-t pt-4 flex justify-end"><button onclick="openDeleteModal()" class="text-gray-400 text-sm underline hover:text-red-500">게시글 삭제</button></div>
       </div>
     </div>
@@ -216,7 +219,6 @@
   <button onclick="showPage('write')" class="md:hidden fixed bottom-6 right-6 bg-blue-600 text-white w-14 h-14 rounded-full shadow-lg flex items-center justify-center text-2xl hover:bg-blue-700 z-40 transition transform active:scale-95"><i class="fa-solid fa-plus"></i></button>
 
   <script>
-    // --- 설정 및 데이터 ---
     const COUNTRY_DATA = {
         '한국': { code: '+82', currency: '₩' }, '미국': { code: '+1', currency: '$' }, '캐나다': { code: '+1', currency: 'C$' }, '일본': { code: '+81', currency: '¥' }, '중국': { code: '+86', currency: '¥' }, '호주': { code: '+61', currency: 'A$' }, '뉴질랜드': { code: '+64', currency: 'NZ$' }, '영국': { code: '+44', currency: '£' }, '독일': { code: '+49', currency: '€' }, '프랑스': { code: '+33', currency: '€' }, '베트남': { code: '+84', currency: '₫' }, '필리핀': { code: '+63', currency: '₱' }, '태국': { code: '+66', currency: '฿' }, '싱가포르': { code: '+65', currency: 'S$' }, '말레이시아': { code: '+60', currency: 'RM' }, '인도네시아': { code: '+62', currency: 'Rp' }, '브라질': { code: '+55', currency: 'R$' }, '러시아': { code: '+7', currency: '₽' }, '우즈베키스탄': { code: '+998', currency: 'som' }, '카자흐스탄': { code: '+7', currency: '₸' }
     };
@@ -225,35 +227,26 @@
     let currentDetailId = null;
     let selectedImages = [];
 
-    // --- 통신 유틸리티 (Fetch API) ---
     async function apiFetch(method, body = null) {
       if (GAS_API_URL.includes("여기에")) {
-        alert("Code.gs 배포 후 URL을 index.html의 GAS_API_URL 변수에 넣어야 합니다.");
+        alert("GAS 웹 앱 URL을 설정해주세요.");
         return null;
       }
-
-      const options = {
-        method: method,
-      };
-
-      // POST 요청 시, 구글 Apps Script의 CORS 제약을 피하기 위해 
-      // Content-Type을 text/plain으로 설정하여 Preflight(OPTIONS) 요청을 건너뜀
+      const options = { method: method };
       if (method === 'POST' && body) {
         options.body = JSON.stringify(body);
         options.headers = { "Content-Type": "text/plain;charset=utf-8" };
       }
-
       try {
         const response = await fetch(GAS_API_URL, options);
+        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
         return await response.json();
       } catch (error) {
-        console.error("API Error:", error);
-        alert("서버 통신 중 오류가 발생했습니다.");
+        alert("통신 오류: " + error.message);
         return null;
       }
     }
 
-    // --- 초기화 ---
     window.onload = function() {
       initCountryOptions();
       fetchItems();
@@ -286,13 +279,11 @@
       window.scrollTo(0, 0);
     }
 
-    // --- 데이터 조회 (READ) ---
     async function fetchItems() {
       document.getElementById('loading').classList.remove('hidden');
       document.getElementById('item-grid').innerHTML = '';
       document.getElementById('no-data').classList.add('hidden');
 
-      // GET 요청
       const data = await apiFetch('GET');
       
       document.getElementById('loading').classList.add('hidden');
@@ -308,10 +299,8 @@
       if (items.length === 0) {
         document.getElementById('no-data').classList.remove('hidden');
         return;
-      } else {
-        document.getElementById('no-data').classList.add('hidden');
       }
-
+      
       items.forEach(item => {
         let images = [];
         try { images = JSON.parse(item.images); } catch(e) {}
@@ -359,7 +348,6 @@
       renderItems(filtered);
     }
 
-    // --- 상세 모달 ---
     function openDetail(item) {
       currentDetailId = item.id;
       const modal = document.getElementById('detail-modal');
@@ -386,16 +374,21 @@
       });
 
       // 버튼 제어
-      const setupBtn = (id, val, clickHandler) => {
+      const setupBtn = (id, val, clickHandler, textHtml) => {
         const el = document.getElementById(id);
-        if(val) { el.classList.remove('hidden'); el.onclick = clickHandler; }
+        if(val) { 
+            el.classList.remove('hidden'); 
+            el.onclick = clickHandler; 
+            if(textHtml) el.innerHTML = textHtml; 
+        }
         else el.classList.add('hidden');
       };
 
+      // [수정] 전화 걸기
       setupBtn('btn-phone', item.phone, () => {
-         if(/Android|iPhone/i.test(navigator.userAgent)) window.location.href = `tel:${item.phone}`;
-         else navigator.clipboard.writeText(item.phone).then(() => alert('전화번호 복사됨'));
-      });
+         window.location.href = `tel:${item.phone}`;
+      }, '<i class="fa-solid fa-phone"></i> 전화 걸기');
+
       setupBtn('btn-kakao-copy', item.kakaoId, () => navigator.clipboard.writeText(item.kakaoId).then(() => alert('카톡 ID 복사됨')));
       setupBtn('btn-open-chat', (item.openChat && item.openChat.startsWith('http')), () => window.open(item.openChat, '_blank'));
 
@@ -404,7 +397,6 @@
 
     function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
 
-    // --- 데이터 삭제 (DELETE) ---
     function openDeleteModal() {
         document.getElementById('password-modal').classList.remove('hidden');
         document.getElementById('delete-password').value = '';
@@ -413,14 +405,11 @@
     async function submitDelete() {
         const pw = document.getElementById('delete-password').value;
         if(!pw) return alert('비밀번호를 입력하세요.');
-        
         const btn = document.querySelector('#password-modal button.bg-red-500');
         const originText = btn.textContent;
         btn.textContent = '처리중...';
-
-        // POST 요청 (action: delete)
-        const res = await apiFetch('POST', { action: 'delete', id: currentDetailId, password: pw });
         
+        const res = await apiFetch('POST', { action: 'delete', id: currentDetailId, password: pw });
         btn.textContent = originText;
         if(res && res.success) {
             alert('삭제되었습니다.');
@@ -432,7 +421,6 @@
         }
     }
 
-    // --- 데이터 등록 (CREATE) ---
     function handleImagePreview(input) {
       const container = document.getElementById('preview-container');
       container.innerHTML = '';
@@ -467,10 +455,10 @@
       const btn = document.getElementById('submit-btn');
       btn.disabled = true;
       btn.textContent = "저장 중...";
-
       const form = document.getElementById('upload-form');
+      
       const formData = {
-        action: 'create', // API 액션 지정
+        action: 'create',
         country: form.country.value,
         city: form.city.value,
         category: form.category.value,
@@ -489,7 +477,6 @@
       };
 
       const res = await apiFetch('POST', formData);
-
       btn.disabled = false;
       btn.textContent = "등록하기";
       if(res && res.success) {
@@ -504,5 +491,4 @@
     }
   </script>
 </body>
-
 </html>
