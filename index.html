@@ -2,458 +2,385 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <title>Global Market | 글로벌 한인장터</title>
+  <title>Global Market</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/variable/pretendardvariable.min.css" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          fontFamily: { sans: ['Pretendard Variable', 'sans-serif'] },
-          colors: { primary: '#4F46E5', primaryHover: '#4338CA', secondary: '#64748B' }
-        }
-      }
-    }
-  </script>
-
   <style>
-    body { background-color: #F8FAFC; color: #1E293B; }
+    .loader { border: 4px solid #f3f3f3; border-top: 4px solid #3b82f6; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    .modal { transition: opacity 0.25s ease; }
+    body { background-color: #f3f4f6; font-family: 'Noto Sans KR', sans-serif; }
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-    .loader { border: 3px solid #E2E8F0; border-top: 3px solid #4F46E5; border-radius: 50%; width: 48px; height: 48px; animation: spin 1s linear infinite; }
-    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-    .input-field { width: 100%; border-radius: 0.5rem; border-width: 1px; border-color: #CBD5E1; background-color: #FFFFFF; padding: 0.75rem 1rem; font-size: 0.875rem; color: #0F172A; transition: all 150ms; }
-    .input-field:focus { border-color: #4F46E5; outline: none; box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1); }
-    .input-field::placeholder { color: #94A3B8; }
-    .aspect-card { aspect-ratio: 4/3; }
   </style>
 </head>
-<body class="antialiased min-h-screen flex flex-col">
+<body class="text-gray-800">
 
   <script>
-    // ★★★ 여기에 배포된 GAS URL을 입력하세요 ★★★
-    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbxKfbLG-_XDFbeEB5suixN_aCWXrqnkQEvO18TCUPk011R_I15YZyYBJTyTZG-yLdKIxQ/exec"; 
+    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbx0yPV8I9Zv5BeammZSg3XQQLJy_QtxzSiU_L6PjUFYARr1dLBTD1sRF4K_1II29eG1jg/exec"; 
+    // 예: "https://script.google.com/macros/s/AKfycbx.../exec"
   </script>
 
-  <nav class="sticky top-0 z-40 w-full bg-white/80 backdrop-blur-md border-b border-slate-200">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex justify-between items-center h-16">
-        <div class="flex items-center gap-2 cursor-pointer group" onclick="showPage('list')">
-          <div class="w-10 h-10 bg-gradient-to-br from-primary to-purple-600 rounded-xl flex items-center justify-center text-white shadow-lg group-hover:shadow-indigo-500/30 transition-all duration-300">
-            <i class="fa-solid fa-earth-americas text-xl"></i>
-          </div>
-          <span class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-800 to-slate-600">글로벌 한인장터</span>
-        </div>
-        <button onclick="openWritePage('create')" class="hidden md:flex items-center gap-2 bg-primary hover:bg-primaryHover text-white px-5 py-2.5 rounded-full font-semibold text-sm transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
-          <i class="fa-solid fa-pen"></i> 상품 등록하기
-        </button>
+  <nav class="bg-white shadow-md sticky top-0 z-50">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
+      <div class="flex items-center space-x-2 cursor-pointer" onclick="showPage('list')">
+        <i class="fa-solid fa-earth-americas text-blue-600 text-2xl"></i>
+        <span class="text-xl font-bold text-blue-600">글로벌 한인장터</span>
       </div>
+      <button onclick="showPage('write')" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition hidden md:block">
+        <i class="fa-solid fa-pen mr-1"></i> 상품 등록
+      </button>
     </div>
   </nav>
 
-  <main class="flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8">
+  <main class="max-w-6xl mx-auto px-4 py-6 min-h-screen">
     
     <div id="list-page">
-      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 mb-8">
-        <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
-          <div class="md:col-span-2 relative">
-            <i class="fa-solid fa-globe absolute left-3 top-3.5 text-slate-400 z-10"></i>
-            <select id="filter-country" class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none cursor-pointer transition-colors hover:bg-slate-100 appearance-none" onchange="filterItems()">
-              <option value="">전체 국가</option>
-            </select>
-          </div>
-          <div class="md:col-span-3 relative">
-            <i class="fa-solid fa-location-dot absolute left-3 top-3.5 text-slate-400 z-10"></i>
-            <input type="text" id="filter-city" placeholder="도시" class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none transition-colors hover:bg-slate-100 placeholder-slate-400" onkeyup="filterItems()">
-          </div>
-          <div class="md:col-span-3 relative">
-            <i class="fa-solid fa-layer-group absolute left-3 top-3.5 text-slate-400 z-10"></i>
-            <select id="filter-category" class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none cursor-pointer transition-colors hover:bg-slate-100 appearance-none" onchange="filterItems()">
-              <option value="">모든 카테고리</option>
-              <option value="디지털/가전">디지털/가전</option>
-              <option value="가구/인테리어">가구/인테리어</option>
-              <option value="생활/가공식품">생활/가공식품</option>
-              <option value="유아동/출산">유아동/출산</option>
-              <option value="의류/잡화">의류/잡화</option>
-              <option value="기타">기타</option>
-            </select>
-          </div>
-          <div class="md:col-span-4 relative">
-            <i class="fa-solid fa-magnifying-glass absolute left-3 top-3.5 text-slate-400 z-10"></i>
-            <input type="text" id="filter-keyword" placeholder="검색어 입력" class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none transition-colors hover:bg-slate-100 placeholder-slate-400" onkeyup="filterItems()">
-          </div>
-        </div>
+      <div class="bg-white p-4 rounded-xl shadow-sm mb-6 grid grid-cols-2 md:grid-cols-5 gap-3">
+        <select id="filter-country" class="border p-2 rounded" onchange="filterItems()">
+          <option value="">전체 국가</option>
+        </select>
+        <input type="text" id="filter-city" placeholder="도시 (예: 런던)" class="border p-2 rounded" onkeyup="filterItems()">
+        <select id="filter-category" class="border p-2 rounded" onchange="filterItems()">
+          <option value="">모든 카테고리</option>
+          <option value="디지털/가전">디지털/가전</option>
+          <option value="가구/인테리어">가구/인테리어</option>
+          <option value="생활/가공식품">생활/가공식품</option>
+          <option value="유아동/출산">유아동/출산</option>
+          <option value="의류/잡화">의류/잡화</option>
+          <option value="기타">기타</option>
+        </select>
+        <input type="text" id="filter-keyword" placeholder="검색어" class="border p-2 rounded col-span-2 md:col-span-2" onkeyup="filterItems()">
       </div>
 
-      <div id="loading" class="flex flex-col items-center justify-center py-20">
-        <div class="loader mb-4"></div>
-        <p class="text-slate-500 font-medium animate-pulse">데이터 로딩 중...</p>
+      <div id="loading" class="flex justify-center py-10">
+        <div class="loader"></div>
       </div>
 
-      <div id="item-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
+      <div id="item-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
       
-      <div id="no-data" class="hidden flex flex-col items-center justify-center py-20 text-slate-400">
-        <i class="fa-regular fa-folder-open text-6xl mb-4 text-slate-200"></i>
-        <p class="text-lg font-medium">등록된 물품이 없습니다.</p>
+      <div id="no-data" class="hidden text-center py-10 text-gray-500">
+        등록된 물품이 없습니다.
       </div>
     </div>
 
-    <div id="write-page" class="hidden max-w-2xl mx-auto">
-      <div class="bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden">
-        <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-          <h2 id="form-title" class="text-xl font-bold text-slate-800">물품 등록</h2>
-          <button onclick="showPage('list')" class="text-slate-400 hover:text-slate-600 transition-colors">
-            <i class="fa-solid fa-xmark text-xl"></i>
-          </button>
+    <div id="write-page" class="hidden max-w-2xl mx-auto bg-white p-6 rounded-xl shadow-md">
+      <h2 class="text-2xl font-bold mb-6 text-gray-800 border-b pb-2">물품 등록</h2>
+      <form id="upload-form" onsubmit="handleUpload(event)">
+        
+        <div class="grid grid-cols-2 gap-4 mb-4">
+          <div>
+            <label class="block text-sm font-medium mb-1">국가</label>
+            <select name="country" id="input-country" class="w-full border p-2 rounded bg-gray-50" required onchange="handleCountryChange(this.value)">
+              <option value="">국가 선택</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">도시</label>
+            <input type="text" name="city" class="w-full border p-2 rounded" placeholder="예: 밴쿠버" required>
+          </div>
         </div>
 
-        <form id="upload-form" onsubmit="handleUpload(event)" class="p-6 space-y-6">
-          <input type="hidden" id="edit-mode" value="create">
-          <input type="hidden" id="edit-id" value="">
+        <div class="mb-4">
+          <label class="block text-sm font-medium mb-1">카테고리</label>
+          <select name="category" class="w-full border p-2 rounded" required>
+            <option value="디지털/가전">디지털/가전</option>
+            <option value="가구/인테리어">가구/인테리어</option>
+            <option value="생활/가공식품">생활/가공식품</option>
+            <option value="유아동/출산">유아동/출산</option>
+            <option value="의류/잡화">의류/잡화</option>
+            <option value="기타">기타</option>
+          </select>
+        </div>
 
-          <div class="space-y-4">
-            <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider">위치 및 카테고리</h3>
-            <div class="grid grid-cols-2 gap-4">
-              <div>
-                <label class="block text-sm font-bold text-slate-700 mb-2">국가 <span class="text-red-500">*</span></label>
-                <select name="country" id="input-country" class="input-field cursor-pointer" required onchange="handleCountryChange(this.value)">
-                  <option value="">국가 선택</option>
-                </select>
-              </div>
-              <div>
-                <label class="block text-sm font-bold text-slate-700 mb-2">도시 <span class="text-red-500">*</span></label>
-                <input type="text" name="city" id="input-city" class="input-field" placeholder="예: 밴쿠버" required>
-              </div>
-            </div>
-            <div>
-              <label class="block text-sm font-bold text-slate-700 mb-2">카테고리 <span class="text-red-500">*</span></label>
-              <select name="category" id="input-category" class="input-field cursor-pointer" required>
-                <option value="디지털/가전">디지털/가전</option>
-                <option value="가구/인테리어">가구/인테리어</option>
-                <option value="생활/가공식품">생활/가공식품</option>
-                <option value="유아동/출산">유아동/출산</option>
-                <option value="의류/잡화">의류/잡화</option>
-                <option value="기타">기타</option>
-              </select>
+        <div class="mb-4">
+          <label class="block text-sm font-medium mb-1">상품명</label>
+          <input type="text" name="title" class="w-full border p-2 rounded" required>
+        </div>
+        <div class="mb-4">
+          <label class="block text-sm font-medium mb-1">상세 설명</label>
+          <textarea name="description" class="w-full border p-2 rounded h-32" required></textarea>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4 mb-4">
+          <div>
+            <label class="block text-sm font-medium mb-1">사용 기간</label>
+            <select name="usage" class="w-full border p-2 rounded">
+              <option value="미개봉">미개봉</option>
+              <option value="1개월 미만">1개월 미만</option>
+              <option value="1~6개월">1~6개월</option>
+              <option value="6개월~1년">6개월~1년</option>
+              <option value="1년 이상">1년 이상</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">거래 방법</label>
+            <div class="flex space-x-4 mt-2">
+              <label><input type="radio" name="delivery" value="직거래" checked> 직거래</label>
+              <label><input type="radio" name="delivery" value="택배"> 택배</label>
             </div>
           </div>
+        </div>
 
-          <hr class="border-slate-100">
-
-          <div class="space-y-4">
-            <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider">상품 상세 정보</h3>
-            <div>
-              <label class="block text-sm font-bold text-slate-700 mb-2">상품명 <span class="text-red-500">*</span></label>
-              <input type="text" name="title" id="input-title" class="input-field" required>
+        <div class="grid grid-cols-2 gap-4 mb-4">
+          <div class="flex gap-2">
+            <div class="w-1/3">
+              <label class="block text-sm font-medium mb-1">통화</label>
+              <input type="text" name="currency" id="currency-input" class="w-full border p-2 rounded bg-gray-100" readonly required>
             </div>
-            <div>
-              <label class="block text-sm font-bold text-slate-700 mb-2">상세 설명 <span class="text-red-500">*</span></label>
-              <textarea name="description" id="input-desc" class="input-field h-32 resize-none leading-relaxed" required></textarea>
-            </div>
-            
-            <div class="grid grid-cols-2 gap-4">
-               <div>
-                <label class="block text-sm font-bold text-slate-700 mb-2">사용 기간</label>
-                <select name="usage" id="input-usage" class="input-field cursor-pointer">
-                  <option value="미개봉">미개봉</option>
-                  <option value="1개월 미만">1개월 미만</option>
-                  <option value="1~6개월">1~6개월</option>
-                  <option value="6개월~1년">6개월~1년</option>
-                  <option value="1년 이상">1년 이상</option>
-                </select>
-              </div>
-              <div>
-                <label class="block text-sm font-bold text-slate-700 mb-2">거래 방법</label>
-                <div class="flex gap-4 mt-3">
-                  <label class="flex items-center gap-2 cursor-pointer">
-                    <input type="radio" name="delivery" value="직거래" checked class="w-4 h-4 text-primary focus:ring-primary border-slate-300">
-                    <span class="text-sm font-medium text-slate-700">직거래</span>
-                  </label>
-                  <label class="flex items-center gap-2 cursor-pointer">
-                    <input type="radio" name="delivery" value="택배" class="w-4 h-4 text-primary focus:ring-primary border-slate-300">
-                    <span class="text-sm font-medium text-slate-700">택배</span>
-                  </label>
-                </div>
-              </div>
-            </div>
-
-            <div class="grid grid-cols-2 gap-4">
-              <div>
-                 <label class="block text-sm font-bold text-slate-700 mb-2">판매 가격 <span class="text-red-500">*</span></label>
-                 <div class="relative">
-                   <input type="text" name="currency" id="currency-input" class="absolute left-0 top-0 bottom-0 w-14 text-center bg-slate-50 border border-r-0 border-slate-300 rounded-l-lg text-slate-600 text-sm font-bold z-10" readonly tabindex="-1">
-                   <input type="number" name="price" id="input-price" class="input-field pl-16 rounded-l-none" placeholder="0" required>
-                 </div>
-              </div>
-              <div>
-                <label class="block text-sm font-bold text-slate-700 mb-2">판매 종료일 <span class="text-red-500">*</span></label>
-                <input type="date" name="endDate" id="input-enddate" class="input-field text-slate-600 cursor-pointer" required>
-              </div>
-            </div>
-
-            <div>
-              <label class="block text-sm font-bold text-slate-700 mb-2">사진 (수정 시 새로 업로드)</label>
-              <div class="border-2 border-dashed border-slate-300 rounded-xl p-6 text-center hover:bg-slate-50 hover:border-primary/50 transition-all cursor-pointer relative group">
-                 <input type="file" id="img-input" accept="image/*" multiple onchange="handleImagePreview(this)" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
-                 <div class="text-slate-400 group-hover:text-primary transition-colors">
-                   <div class="bg-slate-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-2 group-hover:bg-indigo-50">
-                     <i class="fa-solid fa-cloud-arrow-up text-xl"></i>
-                   </div>
-                   <p class="text-sm font-medium text-slate-600">클릭하여 이미지 업로드</p>
-                   <p class="text-xs text-slate-400 mt-1">수정 시 이미지를 선택하지 않으면 기존 사진이 유지됩니다.</p>
-                 </div>
-              </div>
-              <div id="preview-container" class="flex gap-3 mt-4 overflow-x-auto pb-2 no-scrollbar"></div>
+            <div class="w-2/3">
+              <label class="block text-sm font-medium mb-1">가격</label>
+              <input type="number" name="price" class="w-full border p-2 rounded" required>
             </div>
           </div>
-
-          <hr class="border-slate-100">
-
-          <div class="space-y-4">
-             <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider">연락처 및 관리</h3>
-             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label class="block text-sm font-bold text-slate-700 mb-2">전화번호</label>
-                <input type="text" name="phone" id="phone-input" class="input-field" placeholder="국가 코드 자동 입력">
-              </div>
-              <div>
-                <label class="block text-sm font-bold text-slate-700 mb-2">카카오톡 ID</label>
-                <input type="text" name="kakaoId" id="input-kakao" class="input-field">
-              </div>
-            </div>
-            <div>
-              <label class="block text-sm font-bold text-slate-700 mb-2">오픈채팅 URL</label>
-              <input type="text" name="openChat" id="input-openchat" class="input-field">
-            </div>
-            <div>
-              <label class="block text-sm font-bold text-slate-700 mb-2">관리 비밀번호 <span class="text-red-500">*</span></label>
-              <input type="password" name="password" id="input-password" class="input-field border-orange-200 focus:border-orange-500 focus:ring-orange-200 bg-orange-50/30" placeholder="등록/수정 확인용 비밀번호" required>
-            </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">판매 종료일</label>
+            <input type="date" name="endDate" class="w-full border p-2 rounded" required>
           </div>
+        </div>
 
-          <div class="pt-4 flex gap-3">
-             <button type="button" onclick="showPage('list')" class="flex-1 bg-white border border-slate-300 text-slate-700 py-3.5 rounded-xl font-bold hover:bg-slate-50 transition-all">취소</button>
-             <button type="submit" id="submit-btn" class="flex-1 bg-primary text-white py-3.5 rounded-xl font-bold hover:bg-primaryHover shadow-lg shadow-indigo-200 transition-all">등록 완료</button>
+        <div class="mb-4">
+          <label class="block text-sm font-medium mb-1">사진 (최대 3장)</label>
+          <input type="file" id="img-input" accept="image/*" multiple onchange="handleImagePreview(this)" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 mb-2">
+          <div id="preview-container" class="flex gap-2 overflow-x-auto"></div>
+          <p class="text-xs text-red-500 mt-1">* 용량 제한으로 이미지는 자동 리사이징됩니다.</p>
+        </div>
+
+        <hr class="my-6 border-gray-200">
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <div>
+            <label class="block text-sm font-medium mb-1">전화번호</label>
+            <input type="text" name="phone" id="phone-input" class="w-full border p-2 rounded" placeholder="코드 자동 입력">
           </div>
-        </form>
-      </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">카카오톡 ID</label>
+            <input type="text" name="kakaoId" class="w-full border p-2 rounded">
+          </div>
+        </div>
+        <div class="mb-6">
+            <label class="block text-sm font-medium mb-1">오픈채팅 URL</label>
+            <input type="text" name="openChat" class="w-full border p-2 rounded">
+        </div>
+
+        <div class="mb-6">
+            <label class="block text-sm font-medium mb-1">관리 비밀번호</label>
+            <input type="password" name="password" class="w-full border p-2 rounded bg-yellow-50" placeholder="삭제/수정 시 필요" required>
+        </div>
+
+        <button type="submit" id="submit-btn" class="w-full bg-blue-600 text-white py-3 rounded-lg font-bold hover:bg-blue-700 transition">등록하기</button>
+        <button type="button" onclick="showPage('list')" class="w-full mt-2 bg-gray-200 text-gray-700 py-3 rounded-lg font-bold hover:bg-gray-300 transition">취소</button>
+      </form>
     </div>
+
   </main>
 
-  <div id="detail-modal" class="fixed inset-0 z-50 hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-    <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity opacity-0 modal-bg" onclick="closeModal('detail-modal')"></div>
-    <div class="fixed inset-0 z-10 overflow-y-auto">
-      <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
-        <div class="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg opacity-0 scale-95 modal-panel border border-slate-100">
-          <button onclick="closeModal('detail-modal')" class="absolute top-4 right-4 z-20 w-8 h-8 flex items-center justify-center rounded-full bg-black/20 hover:bg-black/40 text-white backdrop-blur-md transition-all"><i class="fa-solid fa-xmark"></i></button>
-          <div id="modal-images" class="w-full h-80 bg-slate-100 flex overflow-x-auto snap-x snap-mandatory no-scrollbar"></div>
-          <div class="p-6 sm:p-8">
-            <div class="flex justify-between items-start mb-3">
-              <div class="flex gap-2 text-xs font-bold uppercase tracking-wide">
-                <span id="modal-country-city" class="bg-indigo-50 text-indigo-700 px-2.5 py-1 rounded-md"></span>
-                <span id="modal-category" class="bg-slate-100 text-slate-600 px-2.5 py-1 rounded-md"></span>
-              </div>
-              <span id="modal-time-left" class="text-xs font-bold text-rose-500 border border-rose-100 bg-rose-50 px-2 py-1 rounded-md"></span>
-            </div>
-            <h3 id="modal-title" class="text-2xl font-bold text-slate-900 mb-2 leading-tight break-words"></h3>
-            <p id="modal-price" class="text-2xl font-bold text-primary mb-6"></p>
-            <div class="grid grid-cols-3 gap-2 mb-6 text-sm text-slate-600 bg-slate-50 p-4 rounded-xl border border-slate-100">
-               <div class="text-center border-r border-slate-200 last:border-0"><i class="fa-solid fa-box text-slate-400 mb-1 block"></i><span id="modal-usage" class="font-medium"></span></div>
-               <div class="text-center border-r border-slate-200 last:border-0"><i class="fa-solid fa-truck text-slate-400 mb-1 block"></i><span id="modal-delivery" class="font-medium"></span></div>
-               <div class="text-center"><i class="fa-regular fa-clock text-slate-400 mb-1 block"></i><span id="modal-end-date" class="font-medium"></span></div>
-            </div>
-            <div class="prose prose-sm prose-slate max-w-none mb-8"><p id="modal-desc" class="whitespace-pre-wrap text-slate-600 leading-relaxed"></p></div>
-            <div class="space-y-3">
-              <button id="btn-phone" class="hidden w-full bg-green-500 hover:bg-green-600 text-white py-3.5 rounded-xl font-bold shadow-lg shadow-green-200 transition-all flex items-center justify-center gap-2"></button>
-              <button id="btn-kakao-copy" class="hidden w-full bg-[#FEE500] hover:bg-[#FDD835] text-slate-900 py-3.5 rounded-xl font-bold shadow-lg shadow-yellow-200 transition-all flex items-center justify-center gap-2"><i class="fa-solid fa-comment"></i> 카카오톡 ID 복사</button>
-              <button id="btn-open-chat" class="hidden w-full bg-slate-100 hover:bg-slate-200 text-slate-700 py-3.5 rounded-xl font-bold transition-all flex items-center justify-center gap-2"><i class="fa-solid fa-arrow-up-right-from-square"></i> 오픈채팅 입장</button>
-            </div>
-            <div class="mt-6 pt-6 border-t border-slate-100 flex justify-end gap-3 text-sm">
-              <button id="btn-edit" class="text-slate-400 hover:text-primary underline transition-colors">수정</button>
-              <span class="text-slate-300">|</span>
-              <button onclick="openDeleteModal()" class="text-slate-400 hover:text-red-500 underline transition-colors">삭제</button>
-            </div>
-          </div>
+  <div id="detail-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4 modal">
+    <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto relative no-scrollbar">
+      <button onclick="closeModal('detail-modal')" class="absolute top-4 right-4 text-white bg-black bg-opacity-30 hover:bg-opacity-50 rounded-full w-8 h-8 z-10"><i class="fa-solid fa-xmark"></i></button>
+      <div id="modal-images" class="w-full h-72 bg-gray-900 flex overflow-x-auto snap-x snap-mandatory no-scrollbar"></div>
+      <div class="p-6">
+        <div class="flex justify-between items-start mb-2">
+            <div><span id="modal-country-city" class="text-xs font-semibold bg-blue-100 text-blue-800 px-2 py-1 rounded"></span><span id="modal-category" class="ml-1 text-xs font-semibold bg-gray-100 text-gray-800 px-2 py-1 rounded"></span></div>
+            <span id="modal-time-left" class="text-xs text-red-500 font-bold border border-red-200 px-2 py-1 rounded"></span>
         </div>
+        <h3 id="modal-title" class="text-2xl font-bold mb-1 break-words"></h3>
+        <p id="modal-price" class="text-xl text-blue-600 font-bold mb-4"></p>
+        <div class="bg-gray-50 p-3 rounded mb-4 text-sm text-gray-700 space-y-1">
+            <p><i class="fa-solid fa-box w-5 text-gray-400"></i> <span id="modal-usage"></span></p>
+            <p><i class="fa-solid fa-truck w-5 text-gray-400"></i> <span id="modal-delivery"></span></p>
+            <p><i class="fa-regular fa-clock w-5 text-gray-400"></i> <span id="modal-end-date"></span></p>
+        </div>
+        <div class="bg-white border rounded p-3 mb-6 min-h-[100px]"><p id="modal-desc" class="text-gray-600 whitespace-pre-wrap text-sm"></p></div>
+        <div class="flex flex-col gap-2 mb-4">
+            <button id="btn-phone" class="hidden w-full bg-green-500 text-white py-3 rounded-lg font-bold flex items-center justify-center gap-2"><i class="fa-solid fa-phone"></i> 전화번호 보기</button>
+            <button id="btn-kakao-copy" class="hidden w-full bg-yellow-400 text-black py-3 rounded-lg font-bold flex items-center justify-center gap-2"><i class="fa-solid fa-comment"></i> 카톡 ID 복사</button>
+            <button id="btn-open-chat" class="hidden w-full bg-gray-100 text-gray-800 py-3 rounded-lg font-bold flex items-center justify-center gap-2"><i class="fa-solid fa-arrow-up-right-from-square"></i> 오픈채팅</button>
+        </div>
+        <div class="border-t pt-4 flex justify-end"><button onclick="openDeleteModal()" class="text-gray-400 text-sm underline hover:text-red-500">게시글 삭제</button></div>
       </div>
     </div>
   </div>
 
-  <div id="password-modal" class="fixed inset-0 z-[60] hidden flex items-center justify-center p-4">
-    <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onclick="closeModal('password-modal')"></div>
-    <div class="relative bg-white rounded-xl shadow-xl p-6 w-full max-w-xs transform scale-100 transition-all border border-slate-100">
-      <h3 class="text-lg font-bold text-slate-900 mb-2">삭제 확인</h3>
-      <p class="text-sm text-slate-500 mb-4">비밀번호를 입력해주세요.</p>
-      <input type="password" id="delete-password" class="w-full rounded-lg border-slate-300 focus:border-red-500 focus:ring-red-200 text-sm mb-4 px-3 py-2" placeholder="비밀번호">
-      <div class="flex gap-2">
-        <button onclick="closeModal('password-modal')" class="flex-1 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-sm font-bold transition-colors">취소</button>
-        <button onclick="submitDelete()" class="flex-1 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg text-sm font-bold shadow-md shadow-red-200 transition-colors">삭제</button>
-      </div>
+  <div id="password-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-lg p-6 max-w-sm w-full shadow-lg">
+        <h3 class="text-lg font-bold mb-4">비밀번호 확인</h3>
+        <input type="password" id="delete-password" class="w-full border p-2 rounded mb-4" placeholder="비밀번호 입력">
+        <div class="flex justify-end gap-2">
+            <button onclick="closeModal('password-modal')" class="px-4 py-2 bg-gray-200 rounded">취소</button>
+            <button onclick="submitDelete()" class="px-4 py-2 bg-red-500 text-white rounded">삭제</button>
+        </div>
+    </div>
+  </div>
+  
+  <div id="custom-alert-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-[60] flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl p-6 max-w-sm w-full shadow-2xl transform transition-all scale-100">
+        <div class="text-center">
+            <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 mb-4">
+                <i class="fa-solid fa-check text-blue-600 text-xl"></i>
+            </div>
+            <h3 class="text-lg font-bold text-gray-900 mb-2">알림</h3>
+            <p id="custom-alert-message" class="text-sm text-gray-500 mb-6">내용</p>
+            <button onclick="confirmCustomAlert()" class="w-full bg-blue-600 text-white py-2 px-4 rounded-lg font-bold hover:bg-blue-700 focus:outline-none transition">
+                확인
+            </button>
+        </div>
     </div>
   </div>
 
-  <button onclick="openWritePage('create')" class="md:hidden fixed bottom-6 right-6 w-14 h-14 bg-primary text-white rounded-full shadow-xl shadow-indigo-500/40 flex items-center justify-center text-2xl z-40 transition-transform active:scale-90 hover:bg-primaryHover"><i class="fa-solid fa-plus"></i></button>
+  <button onclick="showPage('write')" class="md:hidden fixed bottom-6 right-6 bg-blue-600 text-white w-14 h-14 rounded-full shadow-lg flex items-center justify-center text-2xl hover:bg-blue-700 z-40 transition transform active:scale-95"><i class="fa-solid fa-plus"></i></button>
 
   <script>
-    const COUNTRY_DATA = { '한국': { code: '+82', currency: '₩' }, '미국': { code: '+1', currency: '$' }, '캐나다': { code: '+1', currency: 'C$' }, '일본': { code: '+81', currency: '¥' }, '중국': { code: '+86', currency: '¥' }, '호주': { code: '+61', currency: 'A$' }, '뉴질랜드': { code: '+64', currency: 'NZ$' }, '영국': { code: '+44', currency: '£' }, '독일': { code: '+49', currency: '€' }, '프랑스': { code: '+33', currency: '€' }, '베트남': { code: '+84', currency: '₫' }, '필리핀': { code: '+63', currency: '₱' }, '태국': { code: '+66', currency: '฿' }, '싱가포르': { code: '+65', currency: 'S$' }, '말레이시아': { code: '+60', currency: 'RM' }, '인도네시아': { code: '+62', currency: 'Rp' }, '브라질': { code: '+55', currency: 'R$' }, '러시아': { code: '+7', currency: '₽' }, '우즈베키스탄': { code: '+998', currency: 'som' }, '카자흐스탄': { code: '+7', currency: '₸' } };
+    // --- 설정 및 데이터 ---
+    const COUNTRY_DATA = {
+        '한국': { code: '+82', currency: '₩' }, '미국': { code: '+1', currency: '$' }, '캐나다': { code: '+1', currency: 'C$' }, '일본': { code: '+81', currency: '¥' }, '중국': { code: '+86', currency: '¥' }, '호주': { code: '+61', currency: 'A$' }, '뉴질랜드': { code: '+64', currency: 'NZ$' }, '영국': { code: '+44', currency: '£' }, '독일': { code: '+49', currency: '€' }, '프랑스': { code: '+33', currency: '€' }, '베트남': { code: '+84', currency: '₫' }, '필리핀': { code: '+63', currency: '₱' }, '태국': { code: '+66', currency: '฿' }, '싱가포르': { code: '+65', currency: 'S$' }, '말레이시아': { code: '+60', currency: 'RM' }, '인도네시아': { code: '+62', currency: 'Rp' }, '브라질': { code: '+55', currency: 'R$' }, '러시아': { code: '+7', currency: '₽' }, '우즈베키스탄': { code: '+998', currency: 'som' }, '카자흐스탄': { code: '+7', currency: '₸' }
+    };
 
     let allItems = [];
     let currentDetailId = null;
     let selectedImages = [];
-    let currentEditItem = null;
+    
+    // [NEW] 커스텀 알림 콜백 변수
+    let customAlertCallback = null;
 
+    // [NEW] 커스텀 알림 함수
+    function showCustomAlert(message, callback = null) {
+        document.getElementById('custom-alert-message').textContent = message;
+        document.getElementById('custom-alert-modal').classList.remove('hidden');
+        customAlertCallback = callback;
+    }
+
+    // [NEW] 커스텀 알림 확인 버튼 처리
+    function confirmCustomAlert() {
+        document.getElementById('custom-alert-modal').classList.add('hidden');
+        if (customAlertCallback) {
+            customAlertCallback();
+            customAlertCallback = null; // 초기화
+        }
+    }
+
+    // --- 통신 유틸리티 (Fetch API) ---
     async function apiFetch(method, body = null) {
-      if (GAS_API_URL.includes("여기에")) { alert("GAS URL 설정필요"); return null; }
-      const options = { method: method };
+      if (GAS_API_URL.includes("여기에")) {
+        showCustomAlert("Code.gs 배포 후 URL을 index.html의 GAS_API_URL 변수에 넣어야 합니다.");
+        return null;
+      }
+
+      const options = {
+        method: method,
+      };
+
       if (method === 'POST' && body) {
         options.body = JSON.stringify(body);
         options.headers = { "Content-Type": "text/plain;charset=utf-8" };
       }
+
       try {
         const response = await fetch(GAS_API_URL, options);
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
         return await response.json();
-      } catch (error) { alert("오류: " + error.message); return null; }
+      } catch (error) {
+        console.error("API Error:", error);
+        showCustomAlert("서버 통신 중 오류가 발생했습니다.");
+        return null;
+      }
     }
 
-    window.onload = function() { initCountryOptions(); fetchItems(); };
+    // --- 초기화 ---
+    window.onload = function() {
+      initCountryOptions();
+      fetchItems();
+    };
 
     function initCountryOptions() {
-      const selectFilter = document.getElementById('filter-country');
-      const selectInput = document.getElementById('input-country');
-      Object.keys(COUNTRY_DATA).sort().forEach(c => {
-        selectFilter.appendChild(new Option(c, c));
-        selectInput.appendChild(new Option(c, c));
-      });
+        const selectFilter = document.getElementById('filter-country');
+        const selectInput = document.getElementById('input-country');
+        Object.keys(COUNTRY_DATA).sort().forEach(country => {
+            selectFilter.appendChild(new Option(country, country));
+            selectInput.appendChild(new Option(country, country));
+        });
     }
 
     function handleCountryChange(val) {
-      const data = COUNTRY_DATA[val];
-      if (data) {
-        document.getElementById('currency-input').value = data.currency;
-        document.getElementById('phone-input').value = data.code + ' ';
-      }
+        const data = COUNTRY_DATA[val];
+        if (data) {
+            document.getElementById('currency-input').value = data.currency;
+            document.getElementById('phone-input').value = data.code + ' ';
+        } else {
+            document.getElementById('currency-input').value = '';
+            document.getElementById('phone-input').value = '';
+        }
     }
 
     function showPage(pageId) {
-      const listPage = document.getElementById('list-page');
-      const writePage = document.getElementById('write-page');
-      if (pageId === 'list') {
-        writePage.classList.add('hidden');
-        listPage.classList.remove('hidden');
-        fetchItems();
-        window.scrollTo(0, 0);
-      } else {
-        listPage.classList.add('hidden');
-        writePage.classList.remove('hidden');
-        window.scrollTo(0, 0);
-      }
+      document.getElementById('list-page').classList.toggle('hidden', pageId !== 'list');
+      document.getElementById('write-page').classList.toggle('hidden', pageId !== 'write');
+      if (pageId === 'list') fetchItems();
+      window.scrollTo(0, 0);
     }
 
-    // --- 글쓰기/수정 모드 진입 ---
-    function openWritePage(mode, item = null) {
-      const form = document.getElementById('upload-form');
-      const formTitle = document.getElementById('form-title');
-      const submitBtn = document.getElementById('submit-btn');
-      const modeInput = document.getElementById('edit-mode');
-      const idInput = document.getElementById('edit-id');
-      
-      // 초기화
-      form.reset();
-      document.getElementById('preview-container').innerHTML = '';
-      selectedImages = [];
-
-      if (mode === 'edit' && item) {
-        modeInput.value = 'update';
-        idInput.value = item.id;
-        formTitle.textContent = "물품 정보 수정";
-        submitBtn.textContent = "수정 완료";
-        
-        // 기존 데이터 채우기
-        document.getElementById('input-country').value = item.country;
-        handleCountryChange(item.country);
-        document.getElementById('input-city').value = item.city;
-        document.getElementById('input-category').value = item.category;
-        document.getElementById('input-title').value = item.title;
-        document.getElementById('input-desc').value = item.description;
-        document.getElementById('input-usage').value = item.usage;
-        document.querySelector(`input[name="delivery"][value="${item.delivery}"]`).checked = true;
-        document.getElementById('input-price').value = item.price;
-        document.getElementById('input-enddate').value = item.endDate.split('T')[0];
-        document.getElementById('phone-input').value = item.phone || '';
-        document.getElementById('input-kakao').value = item.kakaoId || '';
-        document.getElementById('input-openchat').value = item.openChat || '';
-        
-        // 이미지는 기존 유지 안내 (UI상 별도 처리 없음, 파일선택 안하면 기존유지)
-      } else {
-        modeInput.value = 'create';
-        idInput.value = '';
-        formTitle.textContent = "새로운 물품 등록";
-        submitBtn.textContent = "등록 완료";
-      }
-      
-      showPage('write');
-    }
-
+    // --- 데이터 조회 (READ) ---
     async function fetchItems() {
       document.getElementById('loading').classList.remove('hidden');
       document.getElementById('item-grid').innerHTML = '';
+      document.getElementById('no-data').classList.add('hidden');
+
       const data = await apiFetch('GET');
+      
       document.getElementById('loading').classList.add('hidden');
-      if (data) { allItems = data; renderItems(allItems); }
+      if (data) {
+        allItems = data;
+        renderItems(allItems);
+      }
     }
 
     function renderItems(items) {
       const grid = document.getElementById('item-grid');
       grid.innerHTML = '';
-      if (items.length === 0) { document.getElementById('no-data').classList.remove('hidden'); return; }
-      else document.getElementById('no-data').classList.add('hidden');
-      
-      items.forEach((item, index) => {
+      if (items.length === 0) {
+        document.getElementById('no-data').classList.remove('hidden');
+        return;
+      } else {
+        document.getElementById('no-data').classList.add('hidden');
+      }
+
+      items.forEach(item => {
         let images = [];
         try { images = JSON.parse(item.images); } catch(e) {}
         const thumb = images.length > 0 ? images[0] : 'https://via.placeholder.com/400x300?text=No+Image';
+        
         const endD = new Date(item.endDate);
-        const diffDays = Math.ceil((endD - new Date()) / (1000*60*60*24));
-        let badge = diffDays < 0 ? "마감" : (diffDays === 0 ? "오늘 마감" : `D-${diffDays}`);
-        let badgeColor = diffDays < 0 ? "bg-slate-200 text-slate-500" : (diffDays <= 3 ? "bg-rose-100 text-rose-600" : "bg-slate-100 text-slate-600");
+        const diffDays = Math.ceil((endD - new Date()) / (1000 * 60 * 60 * 24));
+        const dDay = diffDays < 0 ? "마감" : (diffDays === 0 ? "오늘마감" : `D-${diffDays}`);
 
         const div = document.createElement('div');
-        div.style.animation = `fadeInUp 0.5s ease-out ${index * 0.05}s both`;
-        div.className = "group bg-white rounded-2xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer overflow-hidden border border-slate-200 flex flex-col h-full";
+        div.className = "bg-white rounded-xl shadow-sm hover:shadow-md transition cursor-pointer overflow-hidden flex flex-col";
         div.onclick = () => openDetail(item);
         div.innerHTML = `
-          <div class="aspect-card bg-slate-100 overflow-hidden relative">
-            <img src="${thumb}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
-            <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-            <div class="absolute top-3 left-3"><span class="text-[10px] font-bold text-slate-700 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-md shadow-sm">${item.country}</span></div>
+          <div class="h-48 bg-gray-200 overflow-hidden relative group">
+            <img src="${thumb}" class="w-full h-full object-cover transform group-hover:scale-105 transition duration-500">
+            <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-2">
+                <span class="text-white text-xs font-bold px-1">${item.country}</span>
+            </div>
           </div>
           <div class="p-4 flex-1 flex flex-col">
-            <div class="flex justify-between items-start gap-2 mb-2">
-               <h3 class="font-bold text-slate-800 line-clamp-1 group-hover:text-primary transition-colors">${item.title}</h3>
-               <span class="text-[10px] px-1.5 py-0.5 rounded ${badgeColor} font-bold whitespace-nowrap">${badge}</span>
+            <div class="flex justify-between items-start mb-1">
+               <h3 class="font-bold text-lg truncate w-3/4 text-gray-800">${item.title}</h3>
+               <span class="text-xs font-bold text-red-500 bg-red-50 px-2 py-0.5 rounded">${dDay}</span>
             </div>
-            <p class="text-xs text-slate-500 mb-3 truncate">${item.city} · ${item.category}</p>
-            <div class="mt-auto pt-3 border-t border-slate-50 flex justify-between items-center">
-              <span class="text-lg font-bold text-primary">${item.currency} ${Number(item.price).toLocaleString()}</span>
-            </div>
-          </div>`;
+            <p class="text-sm text-gray-500 mb-3 truncate">${item.city} · ${item.category}</p>
+            <div class="mt-auto"><span class="text-lg font-bold text-blue-600">${item.currency} ${Number(item.price).toLocaleString()}</span></div>
+          </div>
+        `;
         grid.appendChild(div);
       });
     }
-
-    const styleSheet = document.createElement("style");
-    styleSheet.innerText = `@keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }`;
-    document.head.appendChild(styleSheet);
 
     function filterItems() {
       const country = document.getElementById('filter-country').value;
       const city = document.getElementById('filter-city').value.toLowerCase();
       const category = document.getElementById('filter-category').value;
       const keyword = document.getElementById('filter-keyword').value.toLowerCase();
+
       const filtered = allItems.filter(item => {
         return (country === "" || item.country === country) &&
                (city === "" || item.city.toLowerCase().includes(city)) &&
@@ -463,66 +390,52 @@
       renderItems(filtered);
     }
 
+    // --- 상세 모달 ---
     function openDetail(item) {
       currentDetailId = item.id;
-      currentEditItem = item; // 수정을 위해 저장
       const modal = document.getElementById('detail-modal');
-      const bg = modal.querySelector('.modal-bg');
-      const panel = modal.querySelector('.modal-panel');
       
       document.getElementById('modal-title').textContent = item.title;
-      document.getElementById('modal-country-city').textContent = `${item.country} · ${item.city}`;
+      document.getElementById('modal-country-city').textContent = `${item.country} | ${item.city}`;
       document.getElementById('modal-category').textContent = item.category;
       document.getElementById('modal-price').textContent = `${item.currency} ${Number(item.price).toLocaleString()}`;
       document.getElementById('modal-usage').textContent = item.usage;
       document.getElementById('modal-delivery').textContent = item.delivery;
       document.getElementById('modal-end-date').textContent = item.endDate.split('T')[0];
       document.getElementById('modal-desc').textContent = item.description;
-      
-      const diff = Math.ceil((new Date(item.endDate) - new Date()) / (1000*60*60*24));
-      document.getElementById('modal-time-left').textContent = diff < 0 ? "종료됨" : (diff === 0 ? "오늘 마감" : `${diff}일 남음`);
 
       const imgContainer = document.getElementById('modal-images');
       imgContainer.innerHTML = '';
       let images = [];
       try { images = JSON.parse(item.images); } catch(e) {}
-      if(images.length === 0) imgContainer.innerHTML = '<div class="flex h-full items-center justify-center text-slate-300">이미지 없음</div>';
+      if(images.length === 0) imgContainer.innerHTML = '<div class="w-full h-full flex items-center justify-center text-gray-400 bg-gray-100">이미지 없음</div>';
       else images.forEach(src => {
-          const img = document.createElement('img');
-          img.src = src;
-          img.className = "snap-center w-full h-full object-contain bg-black/5";
-          imgContainer.appendChild(img);
+        const img = document.createElement('img');
+        img.src = src;
+        img.className = "snap-center w-full h-full object-contain bg-black";
+        imgContainer.appendChild(img);
       });
 
-      const setupBtn = (id, val, clickHandler, html) => {
+      // 버튼 제어
+      const setupBtn = (id, val, clickHandler) => {
         const el = document.getElementById(id);
-        if(val) { el.classList.remove('hidden'); el.onclick = clickHandler; if(html) el.innerHTML = html; }
+        if(val) { el.classList.remove('hidden'); el.onclick = clickHandler; }
         else el.classList.add('hidden');
       };
-      setupBtn('btn-phone', item.phone, () => window.location.href = `tel:${item.phone}`, `<i class="fa-solid fa-phone"></i> 연락하기 (${item.phone})`);
-      setupBtn('btn-kakao-copy', item.kakaoId, () => navigator.clipboard.writeText(item.kakaoId).then(() => alert('카톡 ID 복사됨')));
+
+      setupBtn('btn-phone', item.phone, () => {
+         if(/Android|iPhone/i.test(navigator.userAgent)) window.location.href = `tel:${item.phone}`;
+         else navigator.clipboard.writeText(item.phone).then(() => showCustomAlert('전화번호가 복사되었습니다.'));
+      });
+      setupBtn('btn-kakao-copy', item.kakaoId, () => navigator.clipboard.writeText(item.kakaoId).then(() => showCustomAlert('카카오톡 ID가 복사되었습니다.')));
       setupBtn('btn-open-chat', (item.openChat && item.openChat.startsWith('http')), () => window.open(item.openChat, '_blank'));
 
-      // 수정 버튼 이벤트 연결
-      document.getElementById('btn-edit').onclick = () => {
-        closeModal('detail-modal');
-        openWritePage('edit', currentEditItem);
-      };
-
       modal.classList.remove('hidden');
-      setTimeout(() => { bg.classList.remove('opacity-0'); panel.classList.remove('opacity-0', 'scale-95'); }, 10);
     }
 
-    function closeModal(id) {
-      const modal = document.getElementById(id);
-      if(id === 'detail-modal') {
-        const bg = modal.querySelector('.modal-bg');
-        const panel = modal.querySelector('.modal-panel');
-        bg.classList.add('opacity-0'); panel.classList.add('opacity-0', 'scale-95');
-        setTimeout(() => modal.classList.add('hidden'), 200);
-      } else modal.classList.add('hidden');
-    }
+    function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
 
+    // --- 데이터 삭제 (DELETE) ---
     function openDeleteModal() {
         document.getElementById('password-modal').classList.remove('hidden');
         document.getElementById('delete-password').value = '';
@@ -530,20 +443,28 @@
 
     async function submitDelete() {
         const pw = document.getElementById('delete-password').value;
-        if(!pw) return alert('비밀번호를 입력하세요.');
+        if(!pw) return showCustomAlert('비밀번호를 입력하세요.');
+        
         const btn = document.querySelector('#password-modal button.bg-red-500');
         const originText = btn.textContent;
         btn.textContent = '처리중...';
-        
+
         const res = await apiFetch('POST', { action: 'delete', id: currentDetailId, password: pw });
+        
         btn.textContent = originText;
         if(res && res.success) {
-            alert('삭제되었습니다.');
-            closeModal('password-modal'); closeModal('detail-modal');
-            fetchItems();
-        } else alert(res ? res.message : '실패 (비밀번호 확인)');
+            // [MODIFIED] 커스텀 알림 적용 (삭제 성공 시)
+            closeModal('password-modal');
+            closeModal('detail-modal');
+            showCustomAlert('삭제되었습니다.', () => {
+                fetchItems();
+            });
+        } else {
+            showCustomAlert(res ? res.message : '삭제 실패');
+        }
     }
 
+    // --- 데이터 등록 (CREATE) ---
     function handleImagePreview(input) {
       const container = document.getElementById('preview-container');
       container.innerHTML = '';
@@ -555,14 +476,16 @@
           img.onload = () => {
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
-            const maxW = 600; const scale = maxW / img.width;
-            canvas.width = maxW; canvas.height = img.height * scale;
+            const maxW = 600; 
+            const scale = maxW / img.width;
+            canvas.width = maxW;
+            canvas.height = img.height * scale;
             ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
             const dataUrl = canvas.toDataURL('image/jpeg', 0.6);
             selectedImages.push(dataUrl);
-            const thumb = document.createElement('div');
-            thumb.className = "relative w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden border border-slate-300 shadow-sm";
-            thumb.innerHTML = `<img src="${dataUrl}" class="w-full h-full object-cover">`;
+            const thumb = document.createElement('img');
+            thumb.src = dataUrl;
+            thumb.className = "h-20 w-20 object-cover rounded shadow border shrink-0";
             container.appendChild(thumb);
           }
           img.src = e.target.result;
@@ -574,17 +497,12 @@
     async function handleUpload(e) {
       e.preventDefault();
       const btn = document.getElementById('submit-btn');
-      const originalText = btn.textContent;
       btn.disabled = true;
-      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> 처리 중...';
-      
-      const form = document.getElementById('upload-form');
-      const mode = document.getElementById('edit-mode').value;
-      const id = document.getElementById('edit-id').value;
+      btn.textContent = "저장 중...";
 
+      const form = document.getElementById('upload-form');
       const formData = {
-        action: mode, // 'create' or 'update'
-        id: id,       // update일 경우 ID 포함
+        action: 'create',
         country: form.country.value,
         city: form.city.value,
         category: form.category.value,
@@ -598,22 +516,24 @@
         phone: form.phone.value,
         kakaoId: form.kakaoId.value,
         openChat: form.openChat.value,
-        password: form.password.value, // 등록시 설정, 수정시 검증용
-        images: selectedImages // 수정시 비어있으면 백엔드에서 기존 이미지 유지
+        password: form.password.value,
+        images: selectedImages
       };
 
       const res = await apiFetch('POST', formData);
+
       btn.disabled = false;
-      btn.textContent = originalText;
-      
+      btn.textContent = "등록하기";
       if(res && res.success) {
-        alert(mode === 'update' ? "수정되었습니다!" : "등록되었습니다!");
-        form.reset();
-        document.getElementById('preview-container').innerHTML = '';
-        selectedImages = [];
-        showPage('list');
+        // [MODIFIED] alert() 대신 커스텀 모달 사용
+        showCustomAlert("등록되었습니다!", () => {
+            form.reset();
+            document.getElementById('preview-container').innerHTML = '';
+            selectedImages = [];
+            showPage('list');
+        });
       } else {
-        alert("실패: " + (res ? res.message || res.error : '알 수 없는 오류'));
+        showCustomAlert("등록 실패: " + (res ? res.error : '알 수 없는 오류'));
       }
     }
   </script>
