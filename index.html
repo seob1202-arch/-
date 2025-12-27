@@ -2,6 +2,7 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Global Market</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -9,16 +10,18 @@
     .loader { border: 4px solid #f3f3f3; border-top: 4px solid #3b82f6; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     .modal { transition: opacity 0.25s ease; }
-    body { background-color: #f3f4f6; font-family: 'Noto Sans KR', sans-serif; }
+    body { background-color: #f3f4f6; font-family: 'Noto Sans KR', sans-serif; -webkit-tap-highlight-color: transparent; } /* 탭 하이라이트 제거 */
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    
+    /* [중요] 2. iOS 입력창 확대 방지: 모바일 input 폰트 16px 강제 */
+    @media (max-width: 768px) {
+      input, select, textarea { font-size: 16px !important; }
+    }
   </style>
 </head>
-<body class="text-gray-800">
-
-  <script>
+<body class="text-gray-800 pb-20"> <script>
     const GAS_API_URL = "https://script.google.com/macros/s/AKfycbw-6DyS3CmRxiw0Fbr-0s62myCwj8TsqExLoktQbQOvUEarFHXzpGBmoQQRHs7Phd5MMA/exec"; 
-    // 예: "https://script.google.com/macros/s/AKfycbx.../exec"
   </script>
 
   <nav class="bg-white shadow-md sticky top-0 z-50">
@@ -37,11 +40,11 @@
     
     <div id="list-page">
       <div class="bg-white p-4 rounded-xl shadow-sm mb-6 grid grid-cols-2 md:grid-cols-5 gap-3">
-        <select id="filter-country" class="border p-2 rounded" onchange="filterItems()">
+        <select id="filter-country" class="border p-2 rounded bg-white" onchange="filterItems()">
           <option value="">전체 국가</option>
         </select>
         <input type="text" id="filter-city" placeholder="도시 (예: 런던)" class="border p-2 rounded" onkeyup="filterItems()">
-        <select id="filter-category" class="border p-2 rounded" onchange="filterItems()">
+        <select id="filter-category" class="border p-2 rounded bg-white" onchange="filterItems()">
           <option value="">모든 카테고리</option>
           <option value="디지털/가전">디지털/가전</option>
           <option value="가구/인테리어">가구/인테리어</option>
@@ -228,7 +231,7 @@
     </div>
   </div>
 
-  <button onclick="showPage('write')" class="md:hidden fixed bottom-6 right-6 bg-blue-600 text-white w-14 h-14 rounded-full shadow-lg flex items-center justify-center text-2xl hover:bg-blue-700 z-40 transition transform active:scale-95"><i class="fa-solid fa-plus"></i></button>
+  <button onclick="showPage('write')" class="md:hidden fixed bottom-8 right-6 bg-blue-600 text-white w-14 h-14 rounded-full shadow-lg flex items-center justify-center text-2xl hover:bg-blue-700 z-40 transition transform active:scale-95"><i class="fa-solid fa-plus"></i></button>
 
   <script>
     // --- 설정 및 데이터 ---
@@ -239,36 +242,29 @@
     let allItems = [];
     let currentDetailId = null;
     let selectedImages = [];
-    
-    // [NEW] 커스텀 알림 콜백 변수
     let customAlertCallback = null;
 
-    // [NEW] 커스텀 알림 함수
     function showCustomAlert(message, callback = null) {
         document.getElementById('custom-alert-message').textContent = message;
         document.getElementById('custom-alert-modal').classList.remove('hidden');
         customAlertCallback = callback;
     }
 
-    // [NEW] 커스텀 알림 확인 버튼 처리
     function confirmCustomAlert() {
         document.getElementById('custom-alert-modal').classList.add('hidden');
         if (customAlertCallback) {
             customAlertCallback();
-            customAlertCallback = null; // 초기화
+            customAlertCallback = null;
         }
     }
 
-    // --- 통신 유틸리티 (Fetch API) ---
     async function apiFetch(method, body = null) {
       if (GAS_API_URL.includes("여기에")) {
         showCustomAlert("Code.gs 배포 후 URL을 index.html의 GAS_API_URL 변수에 넣어야 합니다.");
         return null;
       }
 
-      const options = {
-        method: method,
-      };
+      const options = { method: method };
 
       if (method === 'POST' && body) {
         options.body = JSON.stringify(body);
@@ -289,6 +285,16 @@
     window.onload = function() {
       initCountryOptions();
       fetchItems();
+      
+      // [중요] 3. 뒤로가기 버튼으로 모달 닫기 지원 (브라우저 히스토리 조작)
+      window.onpopstate = function(event) {
+          const modals = document.querySelectorAll('.modal, #custom-alert-modal, #password-modal');
+          modals.forEach(modal => {
+              if (!modal.classList.contains('hidden')) {
+                  modal.classList.add('hidden');
+              }
+          });
+      };
     };
 
     function initCountryOptions() {
@@ -395,6 +401,9 @@
       currentDetailId = item.id;
       const modal = document.getElementById('detail-modal');
       
+      // 모달 오픈 시 히스토리 추가 (뒤로가기 지원용)
+      history.pushState({modal: true}, null, "");
+
       document.getElementById('modal-title').textContent = item.title;
       document.getElementById('modal-country-city').textContent = `${item.country} | ${item.city}`;
       document.getElementById('modal-category').textContent = item.category;
@@ -416,7 +425,6 @@
         imgContainer.appendChild(img);
       });
 
-      // 버튼 제어
       const setupBtn = (id, val, clickHandler) => {
         const el = document.getElementById(id);
         if(val) { el.classList.remove('hidden'); el.onclick = clickHandler; }
@@ -424,8 +432,7 @@
       };
 
       setupBtn('btn-phone', item.phone, () => {
-         if(/Android|iPhone/i.test(navigator.userAgent)) window.location.href = `tel:${item.phone}`;
-         else navigator.clipboard.writeText(item.phone).then(() => showCustomAlert('전화번호가 복사되었습니다.'));
+         window.location.href = `tel:${item.phone}`;
       });
       setupBtn('btn-kakao-copy', item.kakaoId, () => navigator.clipboard.writeText(item.kakaoId).then(() => showCustomAlert('카카오톡 ID가 복사되었습니다.')));
       setupBtn('btn-open-chat', (item.openChat && item.openChat.startsWith('http')), () => window.open(item.openChat, '_blank'));
@@ -433,9 +440,14 @@
       modal.classList.remove('hidden');
     }
 
-    function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+    function closeModal(id) { 
+        document.getElementById(id).classList.add('hidden');
+        // 모달 닫을 때 히스토리 뒤로가기 처리 (중복 방지)
+        if(history.state && history.state.modal) {
+            history.back();
+        }
+    }
 
-    // --- 데이터 삭제 (DELETE) ---
     function openDeleteModal() {
         document.getElementById('password-modal').classList.remove('hidden');
         document.getElementById('delete-password').value = '';
@@ -453,7 +465,6 @@
         
         btn.textContent = originText;
         if(res && res.success) {
-            // [MODIFIED] 커스텀 알림 적용 (삭제 성공 시)
             closeModal('password-modal');
             closeModal('detail-modal');
             showCustomAlert('삭제되었습니다.', () => {
@@ -464,7 +475,6 @@
         }
     }
 
-    // --- 데이터 등록 (CREATE) ---
     function handleImagePreview(input) {
       const container = document.getElementById('preview-container');
       container.innerHTML = '';
@@ -525,7 +535,6 @@
       btn.disabled = false;
       btn.textContent = "등록하기";
       if(res && res.success) {
-        // [MODIFIED] alert() 대신 커스텀 모달 사용
         showCustomAlert("등록되었습니다!", () => {
             form.reset();
             document.getElementById('preview-container').innerHTML = '';
